@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="theme-color" content="#000000">
+    
+    <title>Curiosittty // Dark Mode</title>
+
+    <style>
+        /* 2. CRITICAL CSS BLACKOUT */
+        html, body {
+            background-color: #000000; /* Pitch Black */
+            color: #ffffff;
+            margin: 0; padding: 0;
+            height: 100%;
+            font-family: monospace; /* Simple font for testing */
+        }
+
+        /* Layout */
+        .container {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 { font-size: 3rem; margin-bottom: 20px; }
+        p { font-size: 1.2rem; color: #666; max-width: 600px; margin-bottom: 40px; }
+
+        /* UI Elements */
+        input[type="color"] {
+            background: none; border: 1px solid #333;
+            width: 50px; height: 50px; cursor: pointer;
+        }
+        
+        .return-link {
+            position: fixed; top: 30px; left: 30px;
+            color: #666; text-decoration: none; text-transform: uppercase;
+            font-weight: bold; border: 1px solid #333; padding: 10px 20px;
+            transition: 0.2s;
+        }
+        .return-link:hover { color: #fff; border-color: #fff; background: #111; }
+
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="return-link">< RETURN</a>
+
+    <div class="container">
+        <h1 id="test-title">SIGNAL_ESTABLISHED</h1>
+        <p>If you are reading this, the transition was successful. There should have been zero frames of white light.</p>
+        
+        <label>
+            <div style="margin-bottom:10px; color:#444;">ADJUST TEXT HUE</div>
+            <input type="color" id="color-picker" value="#ffffff">
+        </label>
+    </div>
+
+    <script>
+        // Simple Color Logic
+        const picker = document.getElementById('color-picker');
+        const title = document.getElementById('test-title');
+        
+        picker.addEventListener('input', (e) => {
+            title.style.color = e.target.value;
+            title.style.textShadow = `0 0 15px ${e.target.value}`;
+        });
+    </script>
+
+</body>
+</html>
