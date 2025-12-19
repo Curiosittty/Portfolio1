@@ -3,89 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flicker Portfolio - Plus/Minus Triggers</title>
+    
+    <meta name="theme-color" content="#000000">
+
+    <title>Curiosittty</title>
 
     <style>
         /* =========================================
            1. FONT REGISTRATION
            ========================================= */
-        
-        /* --- ARRAY BOLD WIDE (Logo & Triggers) --- */
-        @font-face {
-            font-family: 'Array Bold Wide';
-            src: url('fonts/Array-BoldWide.woff2') format('woff2'),
-                 url('fonts/Array-BoldWide.ttf') format('truetype');
-            font-weight: normal; font-style: normal;
-        }
-
-        /* --- KHAND FAMILY --- */
-        @font-face {
-            font-family: 'Khand Light';
-            src: url('fonts/Khand-Light.woff2') format('woff2'),
-                 url('fonts/Khand-Light.ttf') format('truetype');
-            font-weight: normal; font-style: normal;
-        }
-        @font-face {
-            font-family: 'Khand Regular';
-            src: url('fonts/Khand-Regular.woff2') format('woff2'),
-                 url('fonts/Khand-Regular.ttf') format('truetype');
-            font-weight: normal; font-style: normal;
-        }
-        @font-face {
-            font-family: 'Khand Bold';
-            src: url('fonts/Khand-Bold.woff2') format('woff2'),
-                 url('fonts/Khand-Bold.ttf') format('truetype');
-            font-weight: normal; font-style: normal;
-        }
+        @font-face { font-family: 'Array Bold Wide'; src: url('fonts/Array-BoldWide.woff2') format('woff2'); }
+        @font-face { font-family: 'Khand Light'; src: url('fonts/Khand-Light.woff2') format('woff2'); }
+        @font-face { font-family: 'Khand Regular'; src: url('fonts/Khand-Regular.woff2') format('woff2'); }
+        @font-face { font-family: 'Khand Bold'; src: url('fonts/Khand-Bold.woff2') format('woff2'); }
 
         /* =========================================
            2. VISUAL CONTROL PANEL
            ========================================= */
         :root {
-            /* --- [TYPOGRAPHY ASSIGNMENTS] --- */
+            /* --- [PAUSE BUTTON CONTROLS] --- */
+            --pause-x: -70px;        
+            --pause-y: -14px;         
+            --pause-size: 4rem;      
             
-            /* Logo -> Array Bold Wide */
-            --font-logo: 'Array Bold Wide', sans-serif;
+            /* --- [TRANSITION CONTROLS] --- */
+            --fade-color: #000000;    
+            --fade-speed: 0.2s;       
 
-            /* Triggers (+/-) -> Array Bold Wide */
-            --font-triggers: 'Array Bold Wide', sans-serif;
-
-            /* Menu Links (Header) -> Khand Light */
-            --font-menu-links: 'Khand Light', sans-serif;
-
-            /* Footer Text -> Khand Light */
-            --font-footer: 'Khand Light', sans-serif;
-
-            /* Image Name -> Khand Regular */
-            --font-image-name: 'Khand Regular', sans-serif;
-
-
-            /* --- [SIZING] --- */
-            --logo-size: 5rem; 
-            --trigger-size: 3rem;
-            --menu-item-size: 1.4rem; 
-            --footer-size: 0.9rem;
-            
-            /* --- [LAYOUT ALIGNMENT] --- */
+            /* --- [SYSTEM SETTINGS] --- */
+            --grain-opacity: 1;
+            --hero-width: 55%;
+            --satellite-gap: 20px;
             --nudge-top: -3px; 
-            --nudge-bottom: px;
-            --satellite-gap: 20px;     
-            --hero-width: 55%;         
-
-            /* --- [CINEMA EFFECT] --- */
-            --glow-blur: 900px;        
-            --glow-spread: 1.3;       
-            --glow-intensity: 0.15;    
-            --glow-shift-amount: 30px; 
-
-            /* --- [LIVE STATIC] --- */
-            --grain-opacity: 1;     
+            --nudge-bottom: 3px;
             
             /* --- [COLORS] --- */
             --bg-solid: #0a0a0a;
-            --accent-color: #ffffff;   
+            --accent-color: #ffffff;
             --logo-color: #ffffff;
             --logo-glow: 0 0 15px rgba(255, 255, 255, 0.4);
+
+            /* --- [TYPOGRAPHY] --- */
+            --font-logo: 'Array Bold Wide', sans-serif;
+            --font-triggers: 'Array Bold Wide', sans-serif;
+            --font-menu-links: 'Khand Light', sans-serif;
+            --font-footer: 'Khand Light', sans-serif;
+            --font-image-name: 'Khand Regular', sans-serif;
+            
+            --logo-size: 5rem; --trigger-size: 3rem; --menu-item-size: 1.4rem; --footer-size: 0.9rem;
         }
 
         /* =========================================
@@ -102,148 +67,149 @@
             overflow: hidden; cursor: default;
         }
 
-        /* --- THE CANVAS GRAIN LAYER (LAYER 50) --- */
+        /* --- PRELOADER (Z: 10000) --- */
+        #system-preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000;
+            z-index: 10000; 
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-out;
+        }
+        
+        #loader-text {
+            font-family: 'Array Bold Wide', sans-serif;
+            font-size: 2rem; color: #666;
+            letter-spacing: 2px; margin-bottom: 10px;
+            user-select: none;
+            /* Removed transition for static feel */
+        }
+
+        #preloader-status { font-family: 'Khand Light', sans-serif; font-size: 1rem; color: #444; text-transform: uppercase; }
+
+        /* READY STATE: Clean White, No Glow, No Transform */
+        #loader-text.ready-state { 
+            color: #fff; 
+            cursor: pointer; 
+        }
+        
+        body.system-active #system-preloader { opacity: 0; pointer-events: none; }
+
+        /* --- TRANSITION CURTAIN (Z: 9999) --- */
+        #transition-curtain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--fade-color);
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: opacity var(--fade-speed) ease-in-out; 
+        }
+        body.fading-out #transition-curtain { opacity: 1; pointer-events: all; }
+
+        /* --- STATIC CANVAS (Z: 90 - ABOVE UI, BELOW HERO) --- */
         #static-canvas {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; 
-            z-index: 50; 
-            opacity: var(--grain-opacity);
-            mix-blend-mode: overlay;
+            z-index: 90; 
+            opacity: var(--grain-opacity); mix-blend-mode: overlay;
         }
 
         /* =========================================
-           THE CENTRAL CONSOLE
+           UI LAYOUT
            ========================================= */
         
-        /* HEADER (LAYER 40) */
+        /* LOGO (Z: 40 - Under Grain) */
         .console-header { text-align: center; margin-bottom: 25px; z-index: 40; }
-        .logo {
-            font-family: var(--font-logo); 
-            font-size: var(--logo-size);
-            color: var(--logo-color);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-shadow: var(--logo-glow);
-            line-height: 1;
-        }
-
-        /* CONTAINER */
-        #machine-container {
-            width: var(--hero-width); max-width: 1000px;
-            aspect-ratio: 16/9; position: relative; 
-            z-index: auto; 
-        }
-
-        /* --- HERO SCREEN (LAYER 60) --- */
-        #hero-screen {
-            width: 100%; height: 100%;
-            background-color: #000;
-            background-size: cover; background-position: center;
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            z-index: 60;
-        }
-
-        /* --- GLOW LAYER (LAYER 30) --- */
-        #hero-glow {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000;
-            background-size: cover; background-position: center;
-            z-index: 30; 
-            transform: scale(var(--glow-spread));
-            filter: blur(var(--glow-blur)) brightness(var(--glow-intensity));
-            mix-blend-mode: screen; 
-            opacity: 1; 
-            transition: transform 0.1s ease-out; 
-        }
-
-        /* =========================================
-           SATELLITE MENUS
-           ========================================= */
+        .logo { font-family: var(--font-logo); font-size: var(--logo-size); color: var(--logo-color); letter-spacing: 2px; text-transform: uppercase; text-shadow: var(--logo-glow); line-height: 1; }
         
-        /* THE TRIGGERS (+/-) */
-        .satellite-trigger {
-            font-family: var(--font-triggers); 
-            font-size: var(--trigger-size);
-            color: var(--accent-color);
-            line-height: 0.6;
-            cursor: pointer; user-select: none;
-            transition: opacity 0.2s;
+        #machine-container { 
+            width: var(--hero-width); max-width: 1000px; aspect-ratio: 16/9; 
+            position: relative; z-index: auto; 
+            overflow: visible; 
         }
-        .satellite-trigger:hover { color: #ccc; }
-        /* Active state for opacity, text swap handled in JS */
-        .satellite-trigger.active { opacity: 0.4; }
+        
+        /* HERO SCREEN (Z: 100 - Top of Stack, Clean) */
+        #hero-screen { 
+            width: 100%; height: 100%; 
+            background-color: #000; background-size: cover; background-position: center; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            position: relative; 
+            z-index: 100; /* Moves above grain */
+        }
+        
+        /* GLOW (Z: 30 - Background) */
+        #hero-glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-size: cover; background-position: center; z-index: 30; transform: scale(1.3); filter: blur(900px) brightness(0.15); mix-blend-mode: screen; opacity: 1; transition: transform 0.1s ease-out; }
 
-        /* THE LINKS */
-        .satellite-links a {
-            font-family: var(--font-menu-links); 
-            font-size: var(--menu-item-size);
-            color: var(--accent-color);
-            text-decoration: none;
-            white-space: nowrap; display: block;
-            text-transform: uppercase; 
-            letter-spacing: 1px;
+        /* --- PAUSE BUTTON (Z: 80 - Under Grain) --- */
+        #pause-trigger {
+            position: absolute;
+            left: var(--pause-x);
+            top: var(--pause-y);
+            font-family: 'Array Bold Wide', sans-serif;
+            font-size: var(--pause-size);
+            color: #fff;
+            cursor: pointer;
+            z-index: 80; 
+            line-height: 1;
+            user-select: none;
         }
+        
+        #pause-trigger.paused {
+            color: #444; 
+        }
+
+        /* SATELLITE MENUS (Z: 70 - Under Grain) */
+        .satellite-trigger { font-family: var(--font-triggers); font-size: var(--trigger-size); color: var(--accent-color); line-height: 0.6; cursor: pointer; user-select: none; transition: opacity 0.2s; }
+        .satellite-trigger:hover { color: #ccc; } .satellite-trigger.active { opacity: 0.4; }
+        
+        .satellite-links a { font-family: var(--font-menu-links); font-size: var(--menu-item-size); color: var(--accent-color); text-decoration: none; white-space: nowrap; display: block; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
         .satellite-links a:hover { text-decoration: underline; font-weight: bold; }
-
-        /* TOP MENU */
-        .satellite-menu-top {
-            position: absolute; top: var(--nudge-top); right: calc(var(--satellite-gap) * -1);
-            transform: translateX(100%); display: flex; flex-direction: column; align-items: flex-start;
-            text-align: left; z-index: 40; 
-        }
-        #menu-trigger-top { margin-bottom: 15px; }
-        #menu-list-top { display: none; flex-direction: column; gap: 8px; margin-top: 5px; }
-        #menu-list-top.visible { display: flex; }
-
-        /* BOTTOM MENU */
-        .satellite-menu-bottom {
-            position: absolute; bottom: 0; right: calc(var(--satellite-gap) * -1);
-            transform: translateX(100%); display: flex; flex-direction: column; align-items: flex-start;
-            text-align: left; z-index: 40; 
-        }
-        #menu-trigger-bottom { margin-top: 15px; transform: translateY(var(--nudge-bottom)); }
-        #menu-list-bottom {
-            display: none; flex-direction: column; gap: 8px;
-            position: absolute; bottom: 100%; left: 0;
-        }
-        #menu-list-bottom.visible { display: flex; }
-
-        /* FOOTER */
-        .console-footer {
-            margin-top: 25px; 
-            font-family: var(--font-footer); 
-            font-size: var(--footer-size); 
-            color: #666;
-            text-align: center; letter-spacing: 2px; z-index: 40; text-transform: uppercase;
-        }
+        
+        .satellite-menu-top { position: absolute; top: var(--nudge-top); right: calc(var(--satellite-gap) * -1); transform: translateX(100%); display: flex; flex-direction: column; align-items: flex-start; text-align: left; z-index: 70; }
+        .satellite-menu-bottom { position: absolute; bottom: 0; right: calc(var(--satellite-gap) * -1); transform: translateX(100%); display: flex; flex-direction: column; align-items: flex-start; text-align: left; z-index: 70; }
+        
+        #menu-trigger-top { margin-bottom: 15px; } #menu-list-top { display: none; flex-direction: column; gap: 8px; margin-top: 5px; } #menu-list-top.visible { display: flex; }
+        #menu-trigger-bottom { margin-top: 15px; transform: translateY(var(--nudge-bottom)); } #menu-list-bottom { display: none; flex-direction: column; gap: 8px; position: absolute; bottom: 100%; left: 0; } #menu-list-bottom.visible { display: flex; }
+        
+        /* FOOTER (Z: 40 - Under Grain) */
+        .console-footer { margin-top: 25px; font-family: var(--font-footer); font-size: var(--footer-size); color: #666; text-align: center; letter-spacing: 2px; z-index: 40; text-transform: uppercase; }
 
         @media (max-width: 768px) {
             :root { --hero-width: 85%; --satellite-gap: 10px; }
-            .satellite-menu-top, .satellite-menu-bottom { 
-                position: relative; right: auto; top: auto; bottom: auto; transform: none; 
-                flex-direction: row; gap: 20px; margin: 20px 0; justify-content: center; align-items: center;
-            }
+            #pause-trigger { left: 0; top: -60px; } 
+            .satellite-menu-top, .satellite-menu-bottom { position: relative; right: auto; top: auto; bottom: auto; transform: none; flex-direction: row; gap: 20px; margin: 20px 0; justify-content: center; align-items: center; }
             #menu-trigger-top, #menu-trigger-bottom { margin: 0; transform: none; }
-            .satellite-links.visible { position: absolute; background: #000; padding: 15px; border: 1px solid #fff; z-index: 50; }
-            #menu-list-top.visible { top: 50px; }
-            #menu-list-bottom.visible { bottom: auto; top: 50px; }
+            .satellite-links.visible { position: absolute; background: #000; padding: 15px; border: 1px solid #fff; z-index: 70; }
+            #menu-list-top.visible { top: 50px; } #menu-list-bottom.visible { bottom: auto; top: 50px; }
             #machine-container { display: flex; flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
+    <div id="system-preloader">
+        <div id="loader-text">LOADING...</div>
+        <div id="preloader-status">0%</div>
+    </div>
+
     <canvas id="static-canvas"></canvas>
+    
+    <div id="transition-curtain"></div>
+
     <div class="console-header"><div class="logo">Curiosittty</div></div>
 
     <div id="machine-container">
+        
+        <div id="pause-trigger">II</div>
+
         <div id="hero-glow"></div>
 
         <div class="satellite-menu-top">
             <div id="menu-trigger-top" class="satellite-trigger">+</div>
             <div id="menu-list-top" class="satellite-links">
-                <a href="#">Me</a><a href="#">My Work</a><a href="#">My Process</a><a href="#">Contact</a>
+                <a href="more/index.html#section-me" class="nav-link">Me</a>
+                <a href="more/index.html#section-work" class="nav-link">My Work</a>
+                <a href="more/index.html#section-process" class="nav-link">My Process</a>
+                <a href="more/index.html#section-contact" class="nav-link">Contact</a>
             </div>
         </div>
 
@@ -257,134 +223,219 @@
         </div>
     </div>
 
-    <div class="console-footer">LOADING_DATA...</div>
+    <div class="console-footer">SYSTEM_INITIALIZING...</div>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            
+            // --- GLOBAL REFERENCES ---
             const hero = document.getElementById('hero-screen');
             const heroGlow = document.getElementById('hero-glow'); 
             const footerDisplay = document.querySelector('.console-footer');
-            
-            // Get CSS variables for JS use
-            const computedStyle = getComputedStyle(document.documentElement);
-            const glowSpread = computedStyle.getPropertyValue('--glow-spread');
-            const glowShiftAmt = parseInt(computedStyle.getPropertyValue('--glow-shift-amount'));
+            const navLinks = document.querySelectorAll('.nav-link');
+            const preloader = document.getElementById('system-preloader');
+            const loaderText = document.getElementById('loader-text');
+            const preloadStatus = document.getElementById('preloader-status');
+            const pauseBtn = document.getElementById('pause-trigger');
 
-            // --- MENU INTERACTION ---
-            const topTrigger = document.getElementById('menu-trigger-top');
-            const topList = document.getElementById('menu-list-top');
-            const botTrigger = document.getElementById('menu-trigger-bottom');
-            const botList = document.getElementById('menu-list-bottom');
+            // --- SYSTEM STATE ---
+            let flickerTimer; 
+            let isPaused = false; 
 
-            // Function to update the symbol
-            const updateTriggerSymbol = (trigger, isOpen) => {
-                trigger.innerText = isOpen ? '-' : '+';
+            // ============================================
+            //        [ASSET GENERATION & PRELOADING]
+            // ============================================
+            const TOTAL_ASSETS = 50; 
+            const ASSETS = []; 
+            let assetsLoaded = 0;
+
+            for(let i=0; i<TOTAL_ASSETS; i++) {
+                ASSETS.push({ 
+                    // [UPDATED] Removed .JPG extension from display name
+                    name: `CAM_RAW_${String(i).padStart(4, '0')}`, 
+                    url: `https://picsum.photos/seed/${i+500}/1200/675` 
+                });
+            }
+
+            function preloadImages() {
+                const promises = ASSETS.map((asset) => {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.src = asset.url;
+                        img.onload = () => {
+                            assetsLoaded++;
+                            const percent = Math.round((assetsLoaded / TOTAL_ASSETS) * 100);
+                            preloadStatus.innerText = `${percent}%`;
+                            resolve();
+                        };
+                        img.onerror = () => { assetsLoaded++; resolve(); };
+                    });
+                });
+
+                Promise.all(promises).then(() => {
+                    setTimeout(() => {
+                        preloadStatus.style.display = 'none';
+                        loaderText.innerText = "ENTER";
+                        loaderText.classList.add('ready-state');
+                    }, 200);
+                });
+            }
+            preloadImages(); 
+
+            // ============================================
+            //        [ENTER GATE]
+            // ============================================
+            loaderText.addEventListener('click', () => {
+                if(loaderText.classList.contains('ready-state')) {
+                    initAudio();
+                    document.body.classList.add('system-active');
+                    startFlickerLoop(); 
+                    footerDisplay.innerText = "SYSTEM_ONLINE";
+                }
+            });
+
+            // ============================================
+            //        [PAUSE LOGIC]
+            // ============================================
+            pauseBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                isPaused = !isPaused;
+
+                if (isPaused) {
+                    clearTimeout(flickerTimer);
+                    pauseBtn.classList.add('paused');
+                    // [UPDATED] Removed status text change. Keeps image name.
+                } else {
+                    pauseBtn.classList.remove('paused');
+                    startFlickerLoop();
+                    // [UPDATED] Removed status text change. Keeps image name.
+                }
+            });
+
+            // ============================================
+            //        [AUDIO & LOGIC]
+            // ============================================
+            const AUDIO_SETTINGS = {
+                masterVolume: 3, basePitch: 150, oscType: 'sawtooth',
+                clickGain: 0.5, clickSnap: 0.03, stereoWidth: 0.8, proximityRange: 0.8
             };
 
-            // Toggle Top
-            topTrigger.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                const isOpening = !topList.classList.contains('visible');
-                topList.classList.toggle('visible'); 
-                topTrigger.classList.toggle('active');
-                updateTriggerSymbol(topTrigger, isOpening);
+            const computedStyle = getComputedStyle(document.documentElement);
+            const fadeSpeedStr = computedStyle.getPropertyValue('--fade-speed').trim();
+            const fadeSpeedMs = parseFloat(fadeSpeedStr) * 1000;
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault(); 
+                    const targetUrl = link.getAttribute('href');
+                    document.body.classList.add('fading-out');
+                    if (audioEnabled && audioCtx && masterVolumeNode) {
+                        masterVolumeNode.gain.cancelScheduledValues(audioCtx.currentTime);
+                        masterVolumeNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (fadeSpeedMs / 1000));
+                    }
+                    setTimeout(() => { window.location.href = targetUrl; }, fadeSpeedMs);
+                });
             });
 
-            // Toggle Bottom
-            botTrigger.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                const isOpening = !botList.classList.contains('visible');
-                botList.classList.toggle('visible'); 
-                botTrigger.classList.toggle('active'); 
-                updateTriggerSymbol(botTrigger, isOpening);
-            });
+            // --- UI TOGGLES ---
+            const topTrigger = document.getElementById('menu-trigger-top'); const topList = document.getElementById('menu-list-top');
+            const botTrigger = document.getElementById('menu-trigger-bottom'); const botList = document.getElementById('menu-list-bottom');
+            const updateTriggerSymbol = (trigger, isOpen) => { trigger.innerText = isOpen ? '-' : '+'; };
+            topTrigger.addEventListener('click', (e) => { e.stopPropagation(); const isOpening = !topList.classList.contains('visible'); topList.classList.toggle('visible'); topTrigger.classList.toggle('active'); updateTriggerSymbol(topTrigger, isOpening); });
+            botTrigger.addEventListener('click', (e) => { e.stopPropagation(); const isOpening = !botList.classList.contains('visible'); botList.classList.toggle('visible'); botTrigger.classList.toggle('active'); updateTriggerSymbol(botTrigger, isOpening); });
+            document.addEventListener('click', (e) => { if (!e.target.closest('.satellite-menu-top')) { topList.classList.remove('visible'); topTrigger.classList.remove('active'); updateTriggerSymbol(topTrigger, false); } if (!e.target.closest('.satellite-menu-bottom')) { botList.classList.remove('visible'); botTrigger.classList.remove('active'); updateTriggerSymbol(botTrigger, false); } });
 
-            // Global Close Logic
-            document.addEventListener('click', (e) => {
-                // If clicked outside Top, close Top
-                if (!e.target.closest('.satellite-menu-top')) { 
-                    topList.classList.remove('visible'); 
-                    topTrigger.classList.remove('active');
-                    updateTriggerSymbol(topTrigger, false); // Reset to +
-                }
-                // If clicked outside Bottom, close Bottom
-                if (!e.target.closest('.satellite-menu-bottom')) { 
-                    botList.classList.remove('visible'); 
-                    botTrigger.classList.remove('active'); 
-                    updateTriggerSymbol(botTrigger, false); // Reset to +
-                }
-            });
-
-            // --- LIVE STATIC ---
-            const canvas = document.getElementById('static-canvas'); const ctx = canvas.getContext('2d');
-            let width, height; const resize = () => { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; };
+            const staticCanvas = document.getElementById('static-canvas'); const ctx = staticCanvas.getContext('2d');
+            const resize = () => { staticCanvas.width = window.innerWidth; staticCanvas.height = window.innerHeight; };
             window.addEventListener('resize', resize); resize();
             const noise = () => {
-                const w = canvas.width, h = canvas.height; const iData = ctx.createImageData(w, h); const buffer32 = new Uint32Array(iData.data.buffer);
+                const w = staticCanvas.width, h = staticCanvas.height; const iData = ctx.createImageData(w, h); const buffer32 = new Uint32Array(iData.data.buffer);
                 for (let i = 0; i < buffer32.length; i++) if (Math.random() < 0.5) buffer32[i] = 0xffffffff;
                 ctx.putImageData(iData, 0, 0); requestAnimationFrame(noise);
             }; requestAnimationFrame(noise);
 
-            // --- AUDIO & PROXIMITY ---
-            const AUDIO_CONFIG = { maxSpeed: 50, minSpeed: 10, basePitch: 150, clickSnap: 0.03, stereoWidth: 0.8 };
-            let audioCtx; let audioEnabled = false; let currentInterval = AUDIO_CONFIG.minSpeed; let panValue = 0; let filterVal = 100; 
+            const glowSpread = computedStyle.getPropertyValue('--glow-spread');
+            const glowShiftAmt = parseInt(computedStyle.getPropertyValue('--glow-shift-amount'));
+            let audioCtx; let audioEnabled = false; let masterVolumeNode; let currentInterval = 50; let panValue = 0; let filterVal = 100; 
+
             const initAudio = () => {
-                if (!audioCtx) { audioCtx = new window.AudioContext(); audioEnabled = true; }
+                if (!audioCtx) { 
+                    audioCtx = new window.AudioContext(); 
+                    masterVolumeNode = audioCtx.createGain();
+                    masterVolumeNode.gain.value = AUDIO_SETTINGS.masterVolume;
+                    masterVolumeNode.connect(audioCtx.destination);
+                    audioEnabled = true; 
+                }
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                document.removeEventListener('click', initAudio); document.removeEventListener('touchstart', initAudio);
-            }; document.addEventListener('click', initAudio); document.addEventListener('touchstart', initAudio);
+            }; 
+            
             function playSpatialClick() {
-                if (!audioEnabled || !audioCtx) return;
-                const t = audioCtx.currentTime; const osc = audioCtx.createOscillator(); osc.type = 'sawtooth'; 
-                osc.frequency.setValueAtTime(AUDIO_CONFIG.basePitch, t); osc.frequency.exponentialRampToValueAtTime(AUDIO_CONFIG.basePitch * 0.5, t + AUDIO_CONFIG.clickSnap);
+                if (!audioEnabled || !audioCtx) return; 
+                
+                const t = audioCtx.currentTime; const osc = audioCtx.createOscillator(); osc.type = AUDIO_SETTINGS.oscType; 
+                osc.frequency.setValueAtTime(AUDIO_SETTINGS.basePitch, t); osc.frequency.exponentialRampToValueAtTime(AUDIO_SETTINGS.basePitch * 0.5, t + AUDIO_SETTINGS.clickSnap);
                 const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(filterVal, t); 
                 const panner = audioCtx.createStereoPanner(); panner.pan.setValueAtTime(panValue, t);
-                const gain = audioCtx.createGain(); gain.gain.setValueAtTime(0.5, t); gain.gain.exponentialRampToValueAtTime(0.01, t + AUDIO_CONFIG.clickSnap);
-                osc.connect(filter); filter.connect(gain); gain.connect(panner); panner.connect(audioCtx.destination);
-                osc.start(t); osc.stop(t + AUDIO_CONFIG.clickSnap + 0.1);
+                const gain = audioCtx.createGain(); gain.gain.setValueAtTime(AUDIO_SETTINGS.clickGain, t); gain.gain.exponentialRampToValueAtTime(0.01, t + AUDIO_SETTINGS.clickSnap);
+                osc.connect(filter); filter.connect(gain); gain.connect(panner); panner.connect(masterVolumeNode); 
+                osc.start(t); osc.stop(t + AUDIO_SETTINGS.clickSnap + 0.1);
             }
 
-            // --- MOUSE MOVE HANDLER (Glow Shift Only) ---
             document.addEventListener('mousemove', (e) => {
                 const w = window.innerWidth; const h = window.innerHeight;
                 const dx = e.clientX - (w / 2); const dy = e.clientY - (h / 2);
                 
-                // 1. GLOW "BENDING" (Parallax Shift)
                 const normX = dx / (w / 2); const normY = dy / (h / 2);
-                heroGlow.style.transform = `scale(${glowSpread}) translate(${-normX * glowShiftAmt}px, ${-normY * glowShiftAmt}px)`;
+                heroGlow.style.transform = `scale(1.3) translate(${-normX * 30}px, ${-normY * 30}px)`;
 
-                // 2. AUDIO CALCS
                 const maxDist = Math.hypot(w/2, h/2); const dist = Math.hypot(dx, dy);
-                let proximity = 1 - (dist / (maxDist * 0.8)); if (proximity < 0) proximity = 0;
-                currentInterval = AUDIO_CONFIG.maxSpeed + ((1 - proximity) * (AUDIO_CONFIG.minSpeed - AUDIO_CONFIG.maxSpeed));
-                filterVal = 100 + (proximity * 2000); panValue = (dx / (w / 2)) * AUDIO_CONFIG.stereoWidth;
+                let proximity = 1 - (dist / (maxDist * AUDIO_SETTINGS.proximityRange)); 
+                if (proximity < 0) proximity = 0;
+                
+                filterVal = 100 + (proximity * 2000); 
+                panValue = (dx / (w / 2)) * AUDIO_SETTINGS.stereoWidth;
             });
 
             // --- FLICKER ENGINE ---
-            const ASSETS = []; for(let i=0; i<50; i++) ASSETS.push({ name: `CAM_RAW_${String(i).padStart(4, '0')}.JPG`, url: `https://picsum.photos/seed/${i+500}/1200/675` });
-            let currentIndex = 0; let isHovering = false; 
+            let currentIndex = 0; 
+            
             function updateImage() {
                 const currentAsset = ASSETS[currentIndex]; const url = `url('${currentAsset.url}')`;
                 hero.style.backgroundImage = url; heroGlow.style.backgroundImage = url;
-                
-                // --- UPDATE FOOTER TEXT (IMAGE NAME) ---
                 footerDisplay.innerText = currentAsset.name;
-                
-                // FORCE KHAND REGULAR ON THE IMAGE NAME
                 footerDisplay.style.fontFamily = "var(--font-image-name)"; 
-                
                 playSpatialClick(); 
             }
             function stepForward() { currentIndex = (currentIndex + 1) % ASSETS.length; updateImage(); }
             function stepBackward() { currentIndex = (currentIndex - 1 + ASSETS.length) % ASSETS.length; updateImage(); }
-            function startFlickerLoop() { if (!isHovering) stepForward(); setTimeout(startFlickerLoop, currentInterval); }
-            startFlickerLoop();
+            
+            function startFlickerLoop() { 
+                if (!isPaused) {
+                    stepForward(); 
+                    flickerTimer = setTimeout(startFlickerLoop, currentInterval); 
+                }
+            }
 
-            hero.addEventListener('mouseenter', () => { isHovering = true; }); hero.addEventListener('mouseleave', () => { isHovering = false; });
-            hero.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY > 50) stepForward(); else if (e.deltaY < -50) stepBackward(); }, { passive: false });
-            let touchStartX = 0; hero.addEventListener('touchstart', (e) => { isHovering = true; touchStartX = e.touches[0].clientX; }, { passive: true });
-            hero.addEventListener('touchmove', (e) => { const diff = touchStartX - e.touches[0].clientX; if (Math.abs(diff) > 20) { diff > 0 ? stepForward() : stepBackward(); touchStartX = e.touches[0].clientX; } }, { passive: true });
-            hero.addEventListener('touchend', () => { isHovering = false; });
+            hero.addEventListener('wheel', (e) => { 
+                e.preventDefault(); 
+                if (!isPaused) return; 
+                
+                if (e.deltaY > 50) stepForward(); 
+                else if (e.deltaY < -50) stepBackward(); 
+            }, { passive: false });
+
+            let touchStartX = 0; 
+            hero.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+            
+            hero.addEventListener('touchmove', (e) => { 
+                if (!isPaused) return; 
+                
+                const diff = touchStartX - e.touches[0].clientX; 
+                if (Math.abs(diff) > 20) { 
+                    diff > 0 ? stepForward() : stepBackward(); 
+                    touchStartX = e.touches[0].clientX; 
+                } 
+            }, { passive: true });
         });
     </script>
 </body>
