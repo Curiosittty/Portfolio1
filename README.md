@@ -1,1 +1,1 @@
-My first portfolio, designed by me, coded by AI.
+My first portfolio, design by me, code by AI.
