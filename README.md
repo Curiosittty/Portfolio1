@@ -1,1 +1,1 @@
-A website dreamt by an artist, created by an AI.
+My first portfolio, designed by me, coded by AI.
