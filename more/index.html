@@ -5,70 +5,250 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <meta name="theme-color" content="#000000">
-    
-    <title>Curiosittty // Dark Mode</title>
+
+    <title>Curiosittty - Details</title>
 
     <style>
-        /* 2. CRITICAL CSS BLACKOUT */
-        html, body {
-            background-color: #000000; /* Pitch Black */
-            color: #ffffff;
+        /* =========================================
+           1. FONT REGISTRATION (Adjusted paths for subfolder)
+           ========================================= */
+        @font-face { font-family: 'Array Bold Wide'; src: url('../fonts/Array-BoldWide.woff2') format('woff2'); }
+        @font-face { font-family: 'Khand Light'; src: url('../fonts/Khand-Light.woff2') format('woff2'); }
+        @font-face { font-family: 'Khand Regular'; src: url('../fonts/Khand-Regular.woff2') format('woff2'); }
+        @font-face { font-family: 'Khand Bold'; src: url('../fonts/Khand-Bold.woff2') format('woff2'); }
+
+        /* =========================================
+           2. VISUAL CONTROL PANEL
+           ========================================= */
+        :root {
+            /* --- [TRANSITION CONTROLS] --- */
+            --fade-color: #000000;    
+            --fade-speed: 0.2s;       
+
+            /* --- [SYSTEM SETTINGS] --- */
+            --grain-opacity: 1;
+            
+            /* --- [COLORS] --- */
+            --bg-solid: #0a0a0a;
+            --accent-color: #ffffff;
+            --text-dim: #888888;
+
+            /* --- [TYPOGRAPHY] --- */
+            --font-header: 'Array Bold Wide', sans-serif;
+            --font-body: 'Khand Light', sans-serif;
+            --font-ui: 'Khand Regular', sans-serif;
+        }
+
+        /* =========================================
+           CORE STYLES
+           ========================================= */
+        body {
+            background-color: var(--bg-solid);
+            color: #fff;
             margin: 0; padding: 0;
-            height: 100%;
-            font-family: monospace; /* Simple font for testing */
+            font-family: var(--font-body);
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            cursor: default;
         }
 
-        /* Layout */
-        .container {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            height: 100vh;
-            text-align: center;
-        }
-
-        h1 { font-size: 3rem; margin-bottom: 20px; }
-        p { font-size: 1.2rem; color: #666; max-width: 600px; margin-bottom: 40px; }
-
-        /* UI Elements */
-        input[type="color"] {
-            background: none; border: 1px solid #333;
-            width: 50px; height: 50px; cursor: pointer;
+        /* --- TRANSITION CURTAIN (Z: 9999) --- */
+        #transition-curtain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--fade-color);
+            z-index: 9999;
+            opacity: 1; /* Start Black */
+            pointer-events: all;
+            transition: opacity var(--fade-speed) ease-in-out; 
         }
         
-        .return-link {
-            position: fixed; top: 30px; left: 30px;
-            color: #666; text-decoration: none; text-transform: uppercase;
-            font-weight: bold; border: 1px solid #333; padding: 10px 20px;
-            transition: 0.2s;
-        }
-        .return-link:hover { color: #fff; border-color: #fff; background: #111; }
+        /* Loaded State (Fade In) */
+        body.loaded #transition-curtain { opacity: 0; pointer-events: none; }
+        
+        /* Exit State (Fade Out) */
+        body.fading-out #transition-curtain { opacity: 1; pointer-events: all; }
 
+        /* --- STATIC CANVAS (Z: 90) --- */
+        #static-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; 
+            z-index: 90; 
+            opacity: var(--grain-opacity); mix-blend-mode: overlay;
+        }
+
+        /* =========================================
+           UI & LAYOUT
+           ========================================= */
+        
+        /* NAVIGATION (Fixed Top) */
+        .nav-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 30px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-sizing: border-box;
+            z-index: 80;
+            mix-blend-mode: difference;
+        }
+
+        .back-link {
+            font-family: var(--font-ui);
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #fff;
+            letter-spacing: 2px;
+            font-size: 1.1rem;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 0.6; }
+
+        .page-logo {
+            font-family: var(--font-header);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        /* SECTIONS */
+        main {
+            position: relative; z-index: 50; /* Under Grain */
+            padding: 150px 10% 100px 10%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        section {
+            min-height: 80vh;
+            margin-bottom: 100px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 50px;
+        }
+
+        h1.section-title {
+            font-family: var(--font-header);
+            font-size: 4rem;
+            margin-bottom: 30px;
+            line-height: 0.9;
+            color: var(--accent-color);
+        }
+
+        p.section-text {
+            font-size: 1.8rem;
+            line-height: 1.4;
+            max-width: 600px;
+            color: var(--text-dim);
+        }
+
+        /* SMOOTH SCROLL FOR ANCHORS */
+        html { scroll-behavior: smooth; }
+
+        @media (max-width: 768px) {
+            .nav-bar { padding: 20px; }
+            h1.section-title { font-size: 3rem; }
+            main { padding: 100px 5%; }
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="return-link">< RETURN</a>
+    <div id="transition-curtain"></div>
+    <canvas id="static-canvas"></canvas>
 
-    <div class="container">
-        <h1 id="test-title">SIGNAL_ESTABLISHED</h1>
-        <p>If you are reading this, the transition was successful. There should have been zero frames of white light.</p>
+    <nav class="nav-bar">
+        <div class="page-logo">Curiosittty</div>
+        <a href="../index.html" class="back-link">HOME</a>
+    </nav>
+
+    <main>
         
-        <label>
-            <div style="margin-bottom:10px; color:#444;">ADJUST TEXT HUE</div>
-            <input type="color" id="color-picker" value="#ffffff">
-        </label>
-    </div>
+        <section id="section-me">
+            <h1 class="section-title">ME</h1>
+            <p class="section-text">
+                Data point 01.<br>
+                Identity synthesis in progress.<br>
+                Placeholder text for personal manifesto.
+            </p>
+        </section>
+
+        <section id="section-work">
+            <h1 class="section-title">MY WORK</h1>
+            <p class="section-text">
+                Archive access granted.<br>
+                Visual logs and artifact collection.
+            </p>
+        </section>
+
+        <section id="section-process">
+            <h1 class="section-title">MY PROCESS</h1>
+            <p class="section-text">
+                Decompiling methodology.<br>
+                Step-by-step execution protocols.
+            </p>
+        </section>
+
+        <section id="section-contact">
+            <h1 class="section-title">CONTACT</h1>
+            <p class="section-text">
+                Open communication channels.<br>
+                Transmission standing by.
+            </p>
+        </section>
+
+    </main>
 
     <script>
-        // Simple Color Logic
-        const picker = document.getElementById('color-picker');
-        const title = document.getElementById('test-title');
-        
-        picker.addEventListener('input', (e) => {
-            title.style.color = e.target.value;
-            title.style.textShadow = `0 0 15px ${e.target.value}`;
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // --- READ SETTINGS ---
+            const computedStyle = getComputedStyle(document.documentElement);
+            const fadeSpeedStr = computedStyle.getPropertyValue('--fade-speed').trim();
+            const fadeSpeedMs = parseFloat(fadeSpeedStr) * 1000;
+
+            // --- INTRO TRANSITION (Fade In) ---
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 50); // Short buffer to ensure render
+
+            // --- OUTRO TRANSITION (Fade Out) ---
+            // Select all internal links that navigate away
+            const links = document.querySelectorAll('a');
+            
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const target = link.getAttribute('href');
+                    
+                    // Only fade if it's a real navigation (not just a hash jump on same page)
+                    if (target.startsWith('#')) return;
+
+                    e.preventDefault();
+                    document.body.classList.add('fading-out');
+
+                    setTimeout(() => {
+                        window.location.href = target;
+                    }, fadeSpeedMs);
+                });
+            });
+
+            // --- GRAIN ENGINE (Keeps visual consistency) ---
+            const staticCanvas = document.getElementById('static-canvas');
+            const ctx = staticCanvas.getContext('2d');
+            
+            const resize = () => { 
+                staticCanvas.width = window.innerWidth; 
+                staticCanvas.height = window.innerHeight; 
+            };
+            window.addEventListener('resize', resize); 
+            resize();
+            
+            const noise = () => {
+                const w = staticCanvas.width, h = staticCanvas.height; 
+                const iData = ctx.createImageData(w, h); 
+                const buffer32 = new Uint32Array(iData.data.buffer);
+                for (let i = 0; i < buffer32.length; i++) {
+                    if (Math.random() < 0.5) buffer32[i] = 0xffffffff;
+                }
+                ctx.putImageData(iData, 0, 0); 
+                requestAnimationFrame(noise);
+            }; 
+            requestAnimationFrame(noise);
         });
     </script>
-
 </body>
 </html>
